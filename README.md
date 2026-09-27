@@ -1,299 +1,570 @@
-3-Axis Robotic Arm Control Using MATLAB & Simulink
-Project Overview
+# 3-Axis Robotic Arm Control Using MATLAB & Simulink
 
-This project develops and simulates a 3-axis robotic arm control system using MATLAB and Simulink. The objective is to model the rotational dynamics of three robotic joints and design PID controllers that enable each joint to reach a specified angular position accurately and with minimal oscillation.
+A simulation-based control-system project that models and controls a **3-axis rotational robotic arm** using **MATLAB and Simulink**. The project focuses on mathematical modeling of joint dynamics, PID controller design, closed-loop position control, and quantitative performance analysis.
+
+---
+
+## 📌 Project Overview
+
+This project develops and simulates a **3-axis robotic arm control system** using MATLAB and Simulink.
+
+The objective is to model the rotational dynamics of three robotic joints and design PID controllers that enable each joint to reach a specified angular position accurately and with minimal oscillation.
 
 The robotic arm consists of three rotational joints:
 
-J1 – Base: Rotates the robot around its vertical axis.
-J2 – Shoulder: Controls the main arm elevation.
-J3 – Elbow: Controls the forearm movement.
+| Joint  | Name     | Function                                   |
+| ------ | -------- | ------------------------------------------ |
+| **J1** | Base     | Rotates the robot around its vertical axis |
+| **J2** | Shoulder | Controls the main arm elevation            |
+| **J3** | Elbow    | Controls the forearm movement              |
 
-Each joint is modeled using fundamental mechanical dynamics involving inertia, damping, applied torque, and gravity where applicable. PID controllers are then used to reduce the difference between the desired and actual joint angles.
+Each joint is modeled using simplified mechanical dynamics involving:
 
-The project focuses on understanding the complete control-design process:
+* Joint inertia
+* Mechanical damping
+* Applied torque
+* Gravitational torque where applicable
 
-Physical assumptions → Mathematical modeling → Simulink implementation → PID control → Simulation → Performance analysis
+PID controllers are then used to minimize the difference between the desired and actual joint angles.
 
-The model is currently a simulation-based control study and does not yet include physical hardware.
+### Control-Design Process
 
-Objectives
+```text
+Physical Assumptions
+        ↓
+Mathematical Modeling
+        ↓
+Simulink Implementation
+        ↓
+PID Controller Design
+        ↓
+Simulation
+        ↓
+Performance Analysis
+```
+
+> **Current Scope:** This is a simulation-based control study and does not currently include physical robotic-arm hardware.
+
+---
+
+# 🎯 Objectives
 
 The main objectives of this project are:
 
-Develop a mathematical model for a 3-axis robotic arm.
-Represent the mechanical dynamics of each joint in Simulink.
-Include inertia and damping effects.
-Include gravitational torque for the shoulder and elbow joints.
-Design PID controllers for independent joint-angle control.
-Provide independent angle references for J1, J2, and J3.
-Simulate different joint configurations.
-Compare uncontrolled/open-loop and PID-controlled responses.
-Evaluate settling time, overshoot, rise time, and steady-state error.
-Create a foundation for future real-time robotic-arm implementation.
-Robotic Arm Configuration
+* Develop a mathematical model for a 3-axis robotic arm.
+* Represent the mechanical dynamics of each joint in Simulink.
+* Include inertia and damping effects.
+* Include gravitational torque for the shoulder and elbow joints.
+* Design PID controllers for independent joint-angle control.
+* Provide independent angle references for J1, J2, and J3.
+* Simulate different joint configurations.
+* Compare open-loop and PID-controlled responses.
+* Evaluate:
 
-The simulated robot contains exactly three axes.
+  * Rise time
+  * Settling time
+  * Overshoot
+  * Peak response
+  * Final angle
+  * Steady-state error
+* Establish a foundation for future real-time robotic-arm implementation.
 
-J1 – Base Joint
+---
 
-J1 represents the rotational movement of the robot base.
+# 🤖 Robotic Arm Configuration
 
-The simplified dynamic equation is:
+The simulated robot contains exactly **three rotational axes**.
 
-$$ J_1\ddot{\theta}_1 = \tau_1-b_1\dot{\theta}_1 $$
+## J1 — Base Joint
 
-Therefore,
+J1 represents the rotational movement of the robot base around the vertical axis.
 
-$$ \ddot{\theta}_1 = \frac{\tau_1-b_1\dot{\theta}_1}{J_1} $$
-Assumed Parameters
-Parameter	Value	Unit
-Joint inertia \(J_1\)	0.08	kg·m²
-Damping \(b_1\)	0.04	N·m·s/rad
-Gravity	Not included	—
+### Dynamic Equation
 
-The corresponding Simulink gain is:
+$$
+J_1\ddot{\theta}_1 = \tau_1 - b_1\dot{\theta}_1
+$$
 
-$$ \frac{1}{J_1}=\frac{1}{0.08}=12.5 $$
-J2 – Shoulder Joint
+Therefore:
 
-J2 represents the shoulder movement and includes the effect of gravity.
+$$
+\ddot{\theta}_1 =
+\frac{\tau_1-b_1\dot{\theta}_1}{J_1}
+$$
 
-The assumed dynamic equation is:
+### Parameters
 
-$$ J_2\ddot{\theta}_2 = \tau_2-b_2\dot{\theta}_2 -m_2gL_{c2}\sin(\theta_2) $$
-
-Therefore,
-
-$$ \ddot{\theta}_2= \frac{ \tau_2-b_2\dot{\theta}_2 -m_2gL_{c2}\sin(\theta_2) }{J_2} $$
-Assumed Parameters
-Parameter	Value	Unit
-Joint mass \(m_2\)	1.0	kg
-Gravity \(g\)	9.81	m/s²
-Center-of-mass distance \(L_{c2}\)	0.20	m
-Joint inertia \(J_2\)	0.05	kg·m²
-Damping \(b_2\)	0.05	N·m·s/rad
-Gravity coefficient \(m_2gL_{c2}\)	1.962	N·m
+| Parameter             |        Value | Unit      |
+| --------------------- | -----------: | --------- |
+| Joint inertia ($J_1$) |         0.08 | kg·m²     |
+| Damping ($b_1$)       |         0.04 | N·m·s/rad |
+| Gravity               | Not included | —         |
 
 The inverse-inertia gain is:
 
-$$ \frac{1}{J_2}=\frac{1}{0.05}=20 $$
+$$
+\frac{1}{J_1} =
+\frac{1}{0.08}
+= 12.5
+$$
 
-Thus the implemented acceleration relationship is:
+Therefore, the acceleration relationship implemented in Simulink is:
 
-$$ \ddot{\theta}_2= 20[ \tau_2 -1.962\sin(\theta_2) -0.05\dot{\theta}_2 ] $$
-J3 – Elbow Joint
+$$
+\ddot{\theta}_1 =
+12.5(\tau_1-0.04\dot{\theta}_1)
+$$
+
+---
+
+# J2 — Shoulder Joint
+
+J2 represents the shoulder movement and includes gravitational torque.
+
+### Dynamic Equation
+
+$$
+J_2\ddot{\theta}_2 =
+\tau_2-b_2\dot{\theta}_2
+-m_2gL_{c2}\sin(\theta_2)
+$$
+
+Therefore:
+
+$$
+\ddot{\theta}_2 =
+\frac{
+\tau_2-b_2\dot{\theta}_2
+-m_2gL_{c2}\sin(\theta_2)
+}{J_2}
+$$
+
+### Parameters
+
+| Parameter                          | Value | Unit      |
+| ---------------------------------- | ----: | --------- |
+| Joint mass ($m_2$)                 |   1.0 | kg        |
+| Gravity ($g$)                      |  9.81 | m/s²      |
+| Center-of-mass distance ($L_{c2}$) |  0.20 | m         |
+| Joint inertia ($J_2$)              |  0.05 | kg·m²     |
+| Damping ($b_2$)                    |  0.05 | N·m·s/rad |
+| Gravity coefficient ($m_2gL_{c2}$) | 1.962 | N·m       |
+
+The inverse-inertia gain is:
+
+$$
+\frac{1}{J_2}
+=
+\frac{1}{0.05}
+=
+20
+$$
+
+Therefore:
+
+$$
+\ddot{\theta}_2 =
+20[
+\tau_2
+-1.962\sin(\theta_2)
+-0.05\dot{\theta}_2
+]
+$$
+
+---
+
+# J3 — Elbow Joint
 
 J3 represents the elbow movement and also includes gravitational torque.
 
-The dynamic equation is:
+### Dynamic Equation
 
-$$ J_3\ddot{\theta}_3 = \tau_3-b_3\dot{\theta}_3 -m_3gL_{c3}\sin(\theta_3) $$
+$$
+J_3\ddot{\theta}_3 =
+\tau_3-b_3\dot{\theta}_3
+-m_3gL_{c3}\sin(\theta_3)
+$$
 
-Therefore,
+Therefore:
 
-$$ \ddot{\theta}_3= \frac{ \tau_3-b_3\dot{\theta}_3 -m_3gL_{c3}\sin(\theta_3) }{J_3} $$
-Assumed Parameters
-Parameter	Value	Unit
-Joint mass \(m_3\)	0.60	kg
-Gravity \(g\)	9.81	m/s²
-Center-of-mass distance \(L_{c3}\)	0.15	m
-Joint inertia \(J_3\)	0.025	kg·m²
-Damping \(b_3\)	0.03	N·m·s/rad
-Gravity coefficient \(m_3gL_{c3}\)	0.8829	N·m
+$$
+\ddot{\theta}_3 =
+\frac{
+\tau_3-b_3\dot{\theta}_3
+-m_3gL_{c3}\sin(\theta_3)
+}{J_3}
+$$
+
+### Parameters
+
+| Parameter                          |  Value | Unit      |
+| ---------------------------------- | -----: | --------- |
+| Joint mass ($m_3$)                 |   0.60 | kg        |
+| Gravity ($g$)                      |   9.81 | m/s²      |
+| Center-of-mass distance ($L_{c3}$) |   0.15 | m         |
+| Joint inertia ($J_3$)              |  0.025 | kg·m²     |
+| Damping ($b_3$)                    |   0.03 | N·m·s/rad |
+| Gravity coefficient ($m_3gL_{c3}$) | 0.8829 | N·m       |
 
 The inverse-inertia gain is:
 
-$$ \frac{1}{J_3}=\frac{1}{0.025}=40 $$
+$$
+\frac{1}{J_3}
+=
+\frac{1}{0.025}
+=
+40
+$$
 
 Therefore:
 
-$$ \ddot{\theta}_3= 40[ \tau_3 -0.8829\sin(\theta_3) -0.03\dot{\theta}_3 ] $$
-Simulink Model Design
+$$
+\ddot{\theta}_3 =
+40[
+\tau_3
+-0.8829\sin(\theta_3)
+-0.03\dot{\theta}_3
+]
+$$
 
-Each joint follows the same basic control principle:
+---
 
-Reference angle → Error calculation → PID controller → Joint dynamics → Actual angle → Feedback
+# 🎛️ Simulink Control Architecture
 
-The error is calculated as:
+Each joint follows the same basic closed-loop control principle:
 
-$$ e(t)=\theta_{ref}(t)-\theta(t) $$
+```text
+Reference Angle
+      │
+      ▼
+ ┌──────────┐
+ │   Sum    │◄────────────── Actual Angle
+ │ +        │
+ │ −        │
+ └────┬─────┘
+      │
+      ▼
+ ┌──────────┐
+ │   PID    │
+ │Controller│
+ └────┬─────┘
+      │
+      ▼
+ Applied Torque
+      │
+      ▼
+┌───────────────┐
+│ Joint Dynamics│
+└───────┬───────┘
+        │
+        ▼
+   Angular Position
+        │
+        └──────────────► Feedback
+```
+
+The control error is:
+
+$$
+e(t)=\theta_{ref}(t)-\theta(t)
+$$
 
 The PID controller generates the required joint torque:
 
-$$ \tau(t)= K_pe(t) + K_i\int e(t)dt + K_d\frac{de(t)}{dt} $$
+$$
+\tau(t)=
+K_pe(t)
++
+K_i\int e(t)\,dt
++
+K_d\frac{de(t)}{dt}
+$$
 
-The resulting torque is applied to the corresponding joint dynamic model.
+---
 
-PID Controller Values
+# 🎚️ PID Controller Parameters
 
-The current manually tuned PID values are:
+The manually tuned PID values currently used in the simulation are:
 
-Joint	\(K_p\)	\(K_i\)	\(K_d\)
-J1	3	1	0.6
-J2	11.2	51	2.2
-J3	6	2	1
+| Joint  | $K_p$ | $K_i$ | $K_d$ |
+| ------ | ----: | ----: | ----: |
+| **J1** |     3 |     1 |   0.6 |
+| **J2** |  11.2 |    51 |   2.2 |
+| **J3** |     6 |     2 |     1 |
 
-These values are simulation tuning parameters, not universal physical values. They were selected and adjusted based on the simulated response of each joint.
+These values are **simulation tuning parameters** and are not universal values for physical robotic systems.
 
-The controller objective is to achieve:
+They were selected and adjusted based on the simulated response of each joint.
 
-Accurate target-angle tracking
-Low steady-state error
-Reduced oscillation
-Acceptable settling time
-Controlled overshoot
-Angle Input
+### Controller Goals
 
-The model allows independent angle commands for the three joints.
+The PID controllers are designed to achieve:
+
+* Accurate target-angle tracking
+* Low steady-state error
+* Reduced oscillation
+* Acceptable settling time
+* Controlled overshoot
+
+---
+
+# 🎯 Angle Input
+
+The model allows independent angle commands for all three joints.
 
 For example:
 
+```text
 J1 = 30°
 J2 = 45°
 J3 = 60°
+```
 
 Because the mathematical model operates in radians, the conversion is:
 
-$$ \theta_{rad}=\theta_{deg}\frac{\pi}{180} $$
+$$
+\theta_{rad} =
+\theta_{deg}\frac{\pi}{180}
+$$
 
-Therefore:
+### Example Conversion
 
-Joint	Command	Simulink value
-J1	30°	0.5236 rad
-J2	45°	0.7854 rad
-J3	60°	1.0472 rad
+| Joint | Command | Simulink Value |
+| ----- | ------: | -------------: |
+| J1    |     30° |     0.5236 rad |
+| J2    |     45° |     0.7854 rad |
+| J3    |     60° |     1.0472 rad |
 
-This allows different three-axis configurations to be tested without changing the underlying dynamics.
+This allows different three-axis configurations to be tested without changing the underlying mechanical dynamics.
 
-Why These Blocks Are Used
-Sum Block
+---
+
+# 🧩 Simulink Blocks Used
+
+## Sum Block
 
 The Sum block calculates the control error:
 
-$$ e=\theta_{ref}-\theta $$
+$$
+e=\theta_{ref}-\theta
+$$
 
-The +- configuration ensures that the actual joint angle is subtracted from the reference angle.
+The `+-` configuration ensures that the actual joint angle is subtracted from the reference angle.
 
-PID Controller
+---
 
-The PID controller converts the angle error into the required control torque.
+## PID Controller
 
-Gain Block
+The PID controller converts the angular-position error into the required control torque.
+
+It combines:
+
+* Proportional control
+* Integral control
+* Derivative control
+
+---
+
+## Gain Block
 
 The gain represents the inverse joint inertia:
 
-$$ \frac{1}{J} $$
+$$
+\frac{1}{J}
+$$
 
-For example:
+The corresponding gains are:
 
+```text
 J1 → 12.5
 J2 → 20
 J3 → 40
-Integrators
+```
 
-Two integrators convert acceleration into velocity and then position:
+---
 
-$$ \ddot{\theta} \rightarrow \dot{\theta} \rightarrow \theta $$
-Sin Block
+## Integrators
 
-The Sin block models the angle-dependent gravitational torque:
+Two integrators convert angular acceleration into angular velocity and then angular position:
 
-$$ \sin(\theta) $$
+$$
+\ddot{\theta}
+\rightarrow
+\dot{\theta}
+\rightarrow
+\theta
+$$
 
-This is used for J2 and J3.
+---
 
-Damping Gain
+## Sin Block
+
+The `Sin` block models the angle-dependent gravitational torque:
+
+$$
+\sin(\theta)
+$$
+
+It is used for:
+
+* J2 — Shoulder
+* J3 — Elbow
+
+---
+
+## Damping Gain
 
 The damping term is proportional to angular velocity:
 
-$$ b\dot{\theta} $$
+$$
+b\dot{\theta}
+$$
 
-It opposes the motion and represents simplified mechanical friction/damping.
+It opposes motion and represents simplified mechanical damping/friction.
 
-Simulation Method
+---
 
-The project was developed progressively rather than immediately building the complete controller.
+# 🧪 Simulation Methodology
 
-Stage 1 — Mathematical Modeling
+The project was developed progressively rather than immediately building the complete closed-loop controller.
 
-The mechanical assumptions were defined for each joint.
+## Stage 1 — Mathematical Modeling
 
-Stage 2 — Open-Loop Simulation
+Mechanical assumptions were defined for each robotic joint, including:
 
-The joint dynamics were simulated without closed-loop PID control to observe the natural behavior of the system.
+* Inertia
+* Damping
+* Mass
+* Center-of-mass distance
+* Gravity
 
-This stage helps demonstrate how inertia, damping, and gravity influence the arm.
+The governing differential equations were then derived.
 
-Stage 3 — Closed-Loop PID Control
+---
 
-Feedback was added and PID controllers were introduced.
+## Stage 2 — Open-Loop Simulation
 
-The controller continuously compares:
+The joint dynamics were initially simulated without closed-loop PID control.
 
-$$ \text{Desired Angle} - \text{Actual Angle} $$
+This stage helps demonstrate the natural behavior of the mechanical system and the effects of:
 
-and adjusts the torque accordingly.
+* Inertia
+* Damping
+* Gravity
+* Applied torque
 
-Stage 4 — PID Tuning
+The open-loop response provides a baseline for comparison with the controlled system.
+
+---
+
+## Stage 3 — Closed-Loop PID Control
+
+Feedback was added to the system.
+
+The controller continuously calculates:
+
+$$
+\text{Error}
+=
+\text{Desired Angle}
+-
+\text{Actual Angle}
+$$
+
+The PID controller then adjusts the applied torque to reduce this error.
+
+---
+
+## Stage 4 — PID Tuning
 
 The PID gains were manually adjusted by observing:
 
-Oscillation
-Overshoot
-Settling behavior
-Final position
-Steady-state error
-Stage 5 — Multi-Angle Testing
+* Oscillation
+* Overshoot
+* Settling behavior
+* Final position
+* Steady-state error
 
-Different target angles were supplied independently to J1, J2, and J3 to verify that the three joints can operate at different commanded positions.
+---
 
-Example Test
+## Stage 5 — Multi-Angle Testing
 
-One test configuration is:
+Different target angles were supplied independently to J1, J2, and J3.
 
+This verifies that the three joints can operate at different commanded positions.
+
+---
+
+# 🔬 Example Test Configuration
+
+One example test configuration is:
+
+```text
 J1 = 30°
 J2 = 45°
 J3 = 60°
+```
 
-The expected final configuration is therefore:
+The expected final configuration is:
 
-$$ \theta_1=30^\circ $$ $$ \theta_2=45^\circ $$ $$ \theta_3=60^\circ $$
+$$
+\theta_1=30^\circ
+$$
 
-The simulation output can then be compared against the reference angles to determine the tracking performance of each joint.
+$$
+\theta_2=45^\circ
+$$
 
-Before and After PID Comparison
+$$
+\theta_3=60^\circ
+$$
 
-The project includes simulation images showing the difference between uncontrolled and PID-controlled behavior.
+The simulation output can then be compared with the reference angles to determine the tracking performance of each joint.
 
-Before PID Control
+---
 
-The open-loop system demonstrates the natural response of the mechanical model. Depending on the joint, the response can exhibit:
+# 📊 Before and After PID Comparison
 
-Oscillation
-Slow convergence
-Gravity-induced displacement
-Large position error
-Lack of direct target tracking
-After PID Control
+The project includes simulation outputs showing the difference between uncontrolled and PID-controlled behavior.
 
-With feedback control, the system actively corrects the position error.
+## Before PID Control
 
-The response is evaluated using:
+The open-loop system demonstrates the natural response of the mechanical model.
 
-Rise time
-Settling time
-Overshoot
-Peak response
-Final angle
-Steady-state error
+Depending on the joint, the response can exhibit:
 
-The attached screenshots provide visual evidence of the improvement obtained through feedback control.
+* Oscillation
+* Slow convergence
+* Gravity-induced displacement
+* Large position error
+* Lack of direct target tracking
 
-Performance Evaluation
+---
 
-For each simulation, the following MATLAB analysis can be performed:
+## After PID Control
 
+With feedback control, the system continuously corrects the position error.
+
+The controlled response can be evaluated using:
+
+* Rise time
+* Settling time
+* Overshoot
+* Peak response
+* Final angle
+* Steady-state error
+
+Simulation plots provide visual evidence of the effect of feedback control.
+
+---
+
+# 📈 Performance Evaluation
+
+MATLAB can be used to calculate quantitative performance metrics instead of relying only on visual inspection.
+
+Example:
+
+```matlab
 ref = 0.7854;
 
 info = stepinfo(theta_out.Data, ...
@@ -305,68 +576,33 @@ final_angle = theta_out.Data(end);
 steady_state_error = ref - final_angle;
 
 steady_state_error_deg = rad2deg(steady_state_error);
+```
 
-This provides quantitative information rather than relying only on visual inspection.
+### Important Performance Metrics
 
-Important metrics include:
+| Metric                 | Purpose                                                                 |
+| ---------------------- | ----------------------------------------------------------------------- |
+| **Rise Time**          | Time required for the response to reach the target region               |
+| **Settling Time**      | Time required for the response to remain within the specified tolerance |
+| **Overshoot**          | Amount by which the response exceeds the target                         |
+| **Peak Response**      | Maximum angular response                                                |
+| **Final Angle**        | Final achieved joint position                                           |
+| **Steady-State Error** | Difference between reference and final position                         |
 
-Rise Time
-Settling Time
-Overshoot
-Peak
-Final Angle
-Steady-State Error
-Project Scope
+These metrics can be recorded separately for J1, J2, and J3.
 
-This project currently focuses on joint-level robotic-arm control simulation.
+---
 
-It does not yet model:
+# 📁 Suggested Repository Structure
 
-Full industrial robot dynamics
-Motor electrical dynamics
-Gearbox backlash
-Encoder quantization
-Joint friction nonlinearities
-Collision detection
-Inverse kinematics
-Trajectory planning
-Physical gripper control
-Real-time hardware implementation
-
-These can be added as future extensions.
-
-Future Development
-
-The next development stages can include:
-
-3D robotic-arm visualization
-Forward kinematics
-Inverse kinematics
-Smooth trajectory generation
-DC motor and encoder modeling
-ESP32-based hardware implementation
-Real-time angle feedback
-Simulation-versus-hardware comparison
-Sensor noise and disturbance testing
-Advanced control methods such as computed-torque or adaptive control
-Tools & Technologies
-MATLAB
-Simulink
-Simulink Control Design for control-system analysis/tuning where available
-PID Control
-Classical Control Theory
-Mathematical Modeling
-Numerical Simulation
-Repository Contents
-
-You can organize your GitHub repository like this:
-
+```text
 3-axis-robotic-arm-control/
 │
 ├── 3Axis_RoboticArm.slx
 ├── README.md
 │
 ├── results/
+│   │
 │   ├── before_pid/
 │   │   ├── J1_before_PID.png
 │   │   ├── J2_before_PID.png
@@ -381,8 +617,188 @@ You can organize your GitHub repository like this:
 │
 └── documentation/
     └── parameter_reference.md
-Disclaimer / Modeling Assumption
+```
 
-The parameters used in this project are assumed representative values for simulation and educational control-design purposes. They are not intended to represent a specific commercial robotic arm.
+---
 
-The mechanical model is intentionally simplified so that the relationship between physical dynamics, mathematical equations, PID control, and simulation behavior can be studied clearly.
+# 🛠️ Tools & Technologies
+
+| Technology                   | Purpose                                             |
+| ---------------------------- | --------------------------------------------------- |
+| **MATLAB**                   | Mathematical modeling and numerical analysis        |
+| **Simulink**                 | Dynamic system modeling and simulation              |
+| **PID Control**              | Closed-loop joint position control                  |
+| **Simulink Control Design**  | Control-system analysis and tuning, where available |
+| **Classical Control Theory** | Controller design and performance analysis          |
+| **Numerical Simulation**     | Evaluation of robotic joint responses               |
+
+---
+
+# 🚧 Current Project Scope
+
+This project currently focuses on **joint-level robotic-arm control simulation**.
+
+The present model does **not** include:
+
+* Full industrial robot dynamics
+* Motor electrical dynamics
+* Gearbox backlash
+* Encoder quantization
+* Detailed nonlinear joint friction
+* Collision detection
+* Inverse kinematics
+* Trajectory planning
+* Physical gripper control
+* Real-time hardware implementation
+
+These features can be introduced in future versions.
+
+---
+
+# 🚀 Future Development
+
+Possible extensions include:
+
+### 1. 3D Robotic-Arm Visualization
+
+Develop a 3D representation of the robotic arm and visualize joint movements in real time.
+
+### 2. Forward Kinematics
+
+Calculate the end-effector position and orientation from the three joint angles.
+
+### 3. Inverse Kinematics
+
+Calculate the required joint angles for a desired end-effector position.
+
+### 4. Smooth Trajectory Generation
+
+Replace simple step commands with smooth trajectories such as:
+
+* Polynomial trajectories
+* Trapezoidal velocity profiles
+* S-curve profiles
+
+### 5. DC Motor and Encoder Modeling
+
+Extend the mechanical model to include:
+
+* DC motors
+* Motor torque constants
+* Back EMF
+* Encoder feedback
+* Motor voltage control
+
+### 6. ESP32-Based Hardware Implementation
+
+Implement the controller on an ESP32 or similar embedded platform and connect it to physical robotic joints.
+
+### 7. Real-Time Angle Feedback
+
+Use encoders to measure actual joint positions and close the loop around real hardware.
+
+### 8. Simulation-vs-Hardware Comparison
+
+Compare:
+
+```text
+MATLAB/Simulink Response
+          ↓
+Physical Robot Response
+```
+
+to identify modeling errors and real-world effects.
+
+### 9. Disturbance and Sensor-Noise Testing
+
+Introduce:
+
+* External disturbances
+* Sensor noise
+* Parameter variations
+* Load changes
+
+to evaluate controller robustness.
+
+### 10. Advanced Control
+
+Future research can investigate advanced approaches such as:
+
+* Computed-torque control
+* Adaptive control
+* State-space control
+* Model predictive control
+* Robust control
+
+---
+
+# 📌 Modeling Assumptions & Disclaimer
+
+The parameters used in this project are **assumed representative values** intended for simulation and educational control-design purposes.
+
+They are **not intended to represent a specific commercial robotic arm**.
+
+The mechanical model is intentionally simplified so that the relationship between:
+
+```text
+Physical Dynamics
+       ↓
+Mathematical Equations
+       ↓
+Simulink Model
+       ↓
+PID Controller
+       ↓
+Joint Response
+```
+
+can be studied clearly.
+
+A real robotic arm would require additional considerations such as actuator dynamics, coupled joint dynamics, gearbox characteristics, nonlinear friction, encoder feedback, structural flexibility, safety constraints, and hardware limitations.
+
+---
+
+# 📚 Project Summary
+
+This project demonstrates the complete fundamental workflow of a robotic joint control system:
+
+```text
+         ROBOTIC ARM
+              │
+      ┌───────┼───────┐
+      ↓       ↓       ↓
+     J1      J2      J3
+    Base   Shoulder  Elbow
+      │       │       │
+      └───────┼───────┘
+              ↓
+     Mathematical Model
+              ↓
+        Simulink Model
+              ↓
+        PID Controllers
+              ↓
+       Closed-Loop Control
+              ↓
+        Simulation Results
+              ↓
+     Performance Analysis
+```
+
+The project provides a foundation for progressing from **simulation-based joint control** toward **kinematics, trajectory planning, real-time sensing, embedded control, and physical robotic-arm implementation**.
+
+---
+
+## 👨‍💻 Project Status
+
+**Status:** Simulation / Control-System Study
+
+**Axes:** 3 rotational joints
+
+**Controller:** Independent PID controllers
+
+**Platform:** MATLAB + Simulink
+
+**Hardware:** Not currently implemented
+
+**Primary Focus:** Joint-angle position control and performance evaluation
